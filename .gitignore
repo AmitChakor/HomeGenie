@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native builds
+ios/
+android/
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+google-service-account.json
+*.jks
+*.p12
+*.key
+*.mobileprovision
+*.cert
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Supabase local
+supabase/.temp/
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
