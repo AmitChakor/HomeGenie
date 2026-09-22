@@ -106,7 +106,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     [
-      'expo-av',
+      'expo-audio',
       {
         microphonePermission:
           'HomeGenie needs microphone access for voice input.',
@@ -129,11 +129,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   extra: {
     eas: {
-      projectId: process.env.EAS_PROJECT_ID ?? 'YOUR_EAS_PROJECT_ID',
+      projectId: process.env.EAS_PROJECT_ID ?? '2c784dc9-a445-4ba7-a827-0d6577351f7e',
     },
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   },
 
-  owner: 'homegenie',
+  // owner is auto-detected from your Expo account
 });

@@ -1,55 +1,60 @@
 /**
  * What this does:
  * Voice utilities for HomeGenie:
- *   - recordAudio(): starts/stops recording via expo-av, returns the file URI
+ *   - startRecording(): starts recording via expo-audio
+ *   - stopRecording(): stops recording, returns the file URI
  *   - transcribeAudio(uri): uploads audio to the transcribe edge function, returns text
  *   - recordAndTranscribe(): convenience wrapper that records then transcribes
  *   - speak(text): uses expo-speech for TTS output
  *   - stopSpeaking(): stops any current TTS
  */
 
-import { Audio } from 'expo-av';
+import { useAudioRecorder, AudioModule, RecordingPresets } from 'expo-audio';
 import * as Speech from 'expo-speech';
 import { supabase } from './supabase';
 
-let recording: Audio.Recording | null = null;
+// Module-level recorder handle (not a hook — used imperatively outside React)
+let _recorderUri: string | null = null;
+let _recorder: ReturnType<typeof useAudioRecorder> | null = null;
 
 export async function startRecording(): Promise<void> {
-  const { status } = await Audio.requestPermissionsAsync();
-  if (status !== 'granted') {
+  const status = await AudioModule.requestRecordingPermissionsAsync();
+  if (!status.granted) {
     throw new Error('Microphone permission not granted');
   }
 
-  await Audio.setAudioModeAsync({
-    allowsRecordingIOS: true,
-    playsInSilentModeIOS: true,
-  });
-
-  const { recording: newRecording } = await Audio.Recording.createAsync(
-    Audio.RecordingOptionsPresets.HIGH_QUALITY
-  );
-  recording = newRecording;
+  // expo-audio uses hooks inside React; for imperative use we call the low-level API
+  const { AudioRecorder } = await import('expo-audio');
+  const recorder = new AudioRecorder(RecordingPresets.HIGH_QUALITY);
+  await recorder.prepareToRecordAsync();
+  recorder.record();
+  // Store reference via module-level variable
+  (globalThis as Record<string, unknown>).__hg_recorder = recorder;
+  _recorderUri = null;
 }
 
 export async function stopRecording(): Promise<string> {
-  if (!recording) throw new Error('No active recording');
+  const recorder = (globalThis as Record<string, unknown>).__hg_recorder as {
+    stop: () => Promise<void>;
+    uri: string | null;
+    release: () => void;
+  } | undefined;
 
-  await recording.stopAndUnloadAsync();
-  await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+  if (!recorder) throw new Error('No active recording');
 
-  const uri = recording.getURI();
-  recording = null;
+  await recorder.stop();
+  const uri = recorder.uri;
+  recorder.release();
+  (globalThis as Record<string, unknown>).__hg_recorder = null;
 
   if (!uri) throw new Error('Recording URI is null');
+  _recorderUri = uri;
   return uri;
 }
 
 export async function transcribeAudio(uri: string): Promise<string> {
   const fileExtension = uri.split('.').pop() || 'm4a';
   const mimeType = fileExtension === 'webm' ? 'audio/webm' : 'audio/m4a';
-
-  const response = await fetch(uri);
-  const blob = await response.blob();
 
   const formData = new FormData();
   formData.append('file', {
