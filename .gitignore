@@ -31,6 +31,12 @@ google-service-account.json
 .DS_Store
 Thumbs.db
 
+# Build artifacts
+*.apk
+*.aab
+*.ipa
+expo-qr-code.png
+
 # Supabase local
 supabase/.temp/
 

@@ -1,0 +1,8 @@
+# Large/unnecessary files to skip during EAS upload
+.git
+docs/
+*.md
+!README.md
+expo-qr-code.png
+.env.example
+HomeGenie_Claude_Prompts.md

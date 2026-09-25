@@ -68,8 +68,10 @@ function AuthGate() {
     if (!isReady || isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    // In dev builds allow navigating to tabs without a real session
+    const devBypass = __DEV__ && segments[0] === '(tabs)';
 
-    if (!session && !inAuthGroup) {
+    if (!session && !inAuthGroup && !devBypass) {
       router.replace('/(auth)/login');
     } else if (session && inAuthGroup) {
       router.replace('/(tabs)');

@@ -6,6 +6,7 @@
 
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useAuthStore } from '../../stores/authStore';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -83,6 +84,15 @@ export default function LoginScreen() {
               {loading ? 'Sending...' : 'Send OTP'}
             </Text>
           </Pressable>
+
+          {__DEV__ && (
+            <Pressable
+              style={styles.devButton}
+              onPress={() => router.replace('/(tabs)')}
+            >
+              <Text style={styles.devButtonText}>Skip Login (Dev)</Text>
+            </Pressable>
+          )}
         </View>
 
         <Text style={styles.terms}>
@@ -156,5 +166,17 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textTertiary,
     textAlign: 'center',
+  },
+  devButton: {
+    marginTop: Spacing.md,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+  },
+  devButtonText: {
+    ...Typography.bodySmall,
+    color: Colors.textSecondary,
   },
 });
